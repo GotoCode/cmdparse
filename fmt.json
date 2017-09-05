@@ -1,0 +1,7 @@
+[{
+"cmd" : "sort",
+"opt_short" : ["o", "r"],
+"opt_long" : ["output", "reverse"],
+"num_opt_vals" : [1, 0],
+"num_pos_args" : -1
+}]
