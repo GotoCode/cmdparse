@@ -16,7 +16,7 @@
 #   "opt_short" : ["o", "r"],
 #   "opt_long" : ["output", "reverse"],
 #   "num_opt_vals" : [1, 0],
-#   "num_pos_args" : None
+#   "num_pos_args" : -1
 # }
 #
 # fmt.json consists of a list of such
@@ -79,6 +79,8 @@ def parse(cmd_str, fmt):
     # if command exists, then process its argument list
     if cmd_name in fmt:
 
+        cmd_info = fmt[cmd_name]
+
         i = 1
 
         while i < len(tokens):
@@ -88,6 +90,10 @@ def parse(cmd_str, fmt):
             # case: long-form option
             if arg.startswith('--'):
 
+                if arg[2:] not in fmt[cmd_name]['opt_long']:
+
+                    return "Error: Invalid long-form option '{}'".format(arg)
+
                 # extract the long-form option name
                 opt_name = arg[2:]
                 i += 1
@@ -95,29 +101,61 @@ def parse(cmd_str, fmt):
                 # extract all values for this option and
                 # stop once we hit the next option flag
                 opt_vals = []
+
+                # determine number of values for this option
+                num_vals = cmd_info['num_opt_vals'][cmd_info['opt_long'].index(opt_name)]
                 
                 while i < len(tokens) and not tokens[i].startswith('-'):
 
-                    opt_vals.append(tokens[i])
-                    i += 1
+                    # extract exactly num_vals-many argument values (or N-many if num_vals == -1)
+                    if num_vals == -1 or len(opt_vals) < num_vals:
+
+                        opt_vals.append(tokens[i])
+                        i += 1
+
+                    else:
+
+                        break
+
+                if len(opt_vals) < num_vals:
+
+                    return 'Error: Insufficient input values for "{}"'.format(opt_name)
 
                 opt_args.append((opt_name, opt_vals))
 
             # case: short-form option
             elif arg.startswith('-'):
 
-                # extract the long-form option name
+                if arg[1:] not in fmt[cmd_name]['opt_short']:
+
+                    return "Error: Invalid short-form option '{}'".format(arg)
+
+                # extract the short-form option name
                 opt_name = arg[1:]
                 i += 1
 
                 # extract all values for this option and
                 # stop once we hit the next option flag
                 opt_vals = []
+
+                # determine number of values for this option
+                num_vals = cmd_info['num_opt_vals'][cmd_info['opt_short'].index(opt_name)]
                 
                 while i < len(tokens) and not tokens[i].startswith('-'):
 
-                    opt_vals.append(tokens[i])
-                    i += 1
+                    # extract exactly num_vals-many argument values (or N-many if num_vals == -1)
+                    if num_vals == -1 or len(opt_vals) < num_vals:
+
+                        opt_vals.append(tokens[i])
+                        i += 1
+
+                    else:
+
+                        break
+
+                if len(opt_vals) < num_vals:
+
+                    return 'Error: Insufficient input values for "{}"'.format(opt_name)
 
                 opt_args.append((opt_name, opt_vals))
 
