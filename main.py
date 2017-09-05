@@ -30,30 +30,48 @@
 #            (order *must* match that of flags in opt_short)
 # num_opt_vals - number of values for each option
 #                (order *must* match that of flags in opt_short)
-#                (special value of None indicates N-many values)
+#                (special value of -1 indicates N-many values)
 # num_pos_args - # of positional args
-#                (None indicates N-many values)
-# 
+#                (special value of -1 indicates N-many values)
+#
 
-# sort example_file
+import json
 
-# prog: sort
-# pos:  [example_file]
+def load_format():
+    '''
+    This function loads in the data from fmt.json to determine
+    the appropriate format for various commands (cat, sort, etc.)
+    and returns this loaded data as a dictionary object
+    '''
 
-# sort -o out_file example_file
+    cmd_fmt = {}
 
-# prog: sort
-# opt:  [(o, out_file)]
-# pos:  [example_file]
+    with open('fmt.json') as f:
 
-# sort -oout_file example_file
+        raw_json = json.load(f)
 
-# prog: sort
-# opt:  [(o, out_file)]
-# pos:  [example_file]
+    for o in raw_json:
 
-# sort --output=out_file example_file
+        cmd_fmt[o['cmd']] = o
 
-# prog: sort
-# opt:  [(output, out_file)]
-# pos:  [example_file]
+    return cmd_fmt
+
+def parse(cmd_str):
+    '''
+    Given an input string representing a command line input,
+    this function extracts information about the command name,
+    required arguments, optional arguments, flags, etc.
+    '''
+
+    pass
+
+# main user interface
+if __name__ == '__main__':
+
+    print(load_format())
+
+    #while True:
+    
+    #    cmd_input = input('Enter shell input string: ')
+    #    print(parse(cmd_input), end='\n\n')
+    
