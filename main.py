@@ -56,22 +56,96 @@ def load_format():
 
     return cmd_fmt
 
-def parse(cmd_str):
+def parse(cmd_str, fmt):
     '''
     Given an input string representing a command line input,
     this function extracts information about the command name,
     required arguments, optional arguments, flags, etc.
+
+    `fmt` represents the format object, as obtained from load_format
     '''
 
-    pass
+    cmd_name = None
+    pos_args = []
+    opt_args = []
+
+    tokens = cmd_str.split()
+
+    # extract command name from input
+    if len(tokens) > 0:
+
+        cmd_name = tokens[0]
+
+    # if command exists, then process its argument list
+    if cmd_name in fmt:
+
+        i = 1
+
+        while i < len(tokens):
+
+            arg = tokens[i]
+
+            # case: long-form option
+            if arg.startswith('--'):
+
+                # extract the long-form option name
+                opt_name = arg[2:]
+                i += 1
+
+                # extract all values for this option and
+                # stop once we hit the next option flag
+                opt_vals = []
+                
+                while i < len(tokens) and not tokens[i].startswith('-'):
+
+                    opt_vals.append(tokens[i])
+                    i += 1
+
+                opt_args.append((opt_name, opt_vals))
+
+            # case: short-form option
+            elif arg.startswith('-'):
+
+                # extract the long-form option name
+                opt_name = arg[1:]
+                i += 1
+
+                # extract all values for this option and
+                # stop once we hit the next option flag
+                opt_vals = []
+                
+                while i < len(tokens) and not tokens[i].startswith('-'):
+
+                    opt_vals.append(tokens[i])
+                    i += 1
+
+                opt_args.append((opt_name, opt_vals))
+
+            # case: positional argument
+            else:
+
+                pos_args.append(arg)
+                i += 1
+
+    else:
+
+        return None
+
+    return 'cmd: {}\npos args: {}\nopt args: {}'.format(cmd_name, pos_args, opt_args)
+    
 
 # main user interface
 if __name__ == '__main__':
 
-    print(load_format())
+    fmt = load_format()
 
-    #while True:
+    while True:
     
-    #    cmd_input = input('Enter shell input string: ')
-    #    print(parse(cmd_input), end='\n\n')
-    
+        cmd_input = input('Enter shell input string: ')
+
+        result = parse(cmd_input, fmt)
+        
+        if result:
+
+            print(result, end='\n\n')
+
