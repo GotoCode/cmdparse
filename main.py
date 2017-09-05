@@ -90,6 +90,7 @@ def parse(cmd_str, fmt):
             # case: long-form option
             if arg.startswith('--'):
 
+                # check if the specified flag is valid
                 if arg[2:] not in fmt[cmd_name]['opt_long']:
 
                     return "Error: Invalid long-form option '{}'".format(arg)
@@ -126,21 +127,36 @@ def parse(cmd_str, fmt):
             # case: short-form option
             elif arg.startswith('-'):
 
-                if arg[1:] not in fmt[cmd_name]['opt_short']:
+                valid_flag = False
+
+                # check if the specified flag (arg) is valid option (opt)
+                # Note: this code can interpret '-ooutputfile' as '-o outputfile'
+                for opt in fmt[cmd_name]['opt_short']:
+
+                    valid_flag = valid_flag or arg.startswith('-' + opt)
+
+                if not valid_flag:
 
                     return "Error: Invalid short-form option '{}'".format(arg)
 
                 # extract the short-form option name
-                opt_name = arg[1:]
+                opt_name = arg[1:2]
+
+                # list of values for given short-form option
+                opt_vals = []
+
+                # extract the first option value, if it exists (i.e. -oout.txt == -o out.txt)
+                if len(arg) > 2:
+                
+                    opt_vals.append(arg[2:])
+                
                 i += 1
+
+                # determine the number of values for this option
+                num_vals = cmd_info['num_opt_vals'][cmd_info['opt_short'].index(opt_name)]
 
                 # extract all values for this option and
                 # stop once we hit the next option flag
-                opt_vals = []
-
-                # determine number of values for this option
-                num_vals = cmd_info['num_opt_vals'][cmd_info['opt_short'].index(opt_name)]
-                
                 while i < len(tokens) and not tokens[i].startswith('-'):
 
                     # extract exactly num_vals-many argument values (or N-many if num_vals == -1)
